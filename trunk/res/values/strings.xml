@@ -1,0 +1,13 @@
+<resources>
+
+    <string name="app_name">MobileNewsCoverage</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_activity__main">Activity_Main</string>
+	<string name="title_activity_activity__uploadnew">Activity_UploadNew</string>
+	<string name="title_activity_activity__mymessages">Activity_MyMessages</string>
+	<string name="title_activity_activity__myuploads">Activity_MyUploads</string>
+	<string name="title_activity_activity__signup">Activity_Signup</string>
+	<string name="title_activity_activity__welcome">Activity_Welcome</string>
+	<string name="cannot">Cannot</string>
+</resources>
