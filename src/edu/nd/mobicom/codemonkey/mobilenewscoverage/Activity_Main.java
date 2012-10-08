@@ -39,12 +39,12 @@ public class Activity_Main extends Activity {
 	private static final int ACTION_TAKE_PHOTO_B = 1;
 	private static final String BITMAP_STORAGE_KEY = "viewbitmap";
 	private static final String IMAGEVIEW_VISIBILITY_STORAGE_KEY = "imageviewvisibility";
-	private ImageView mImageView;
+//	private ImageView mImageView;
 	private Bitmap mImageBitmap;
 
 	private static final String VIDEO_STORAGE_KEY = "viewvideo";
 	private static final String VIDEOVIEW_VISIBILITY_STORAGE_KEY = "videoviewvisibility";
-	private VideoView mVideoView;
+//	private VideoView mVideoView;
 	private Uri mVideoUri;
 
 	private String mCurrentPhotoPath;
@@ -105,8 +105,8 @@ public class Activity_Main extends Activity {
 		/* So pre-scale the target bitmap into which the file is decoded */
 
 		/* Get the size of the ImageView */
-		int targetW = mImageView.getWidth();
-		int targetH = mImageView.getHeight();
+//		int targetW = mImageView.getWidth();
+//		int targetH = mImageView.getHeight();
 
 		/* Get the size of the image */
 		BitmapFactory.Options bmOptions = new BitmapFactory.Options();
@@ -117,9 +117,9 @@ public class Activity_Main extends Activity {
 		
 		/* Figure out which way needs to be reduced less */
 		int scaleFactor = 1;
-		if ((targetW > 0) || (targetH > 0)) {
-			scaleFactor = Math.min(photoW/targetW, photoH/targetH);	
-		}
+//		if ((targetW > 0) || (targetH > 0)) {
+//			scaleFactor = Math.min(photoW/targetW, photoH/targetH);	
+//		}
 
 		/* Set bitmap options to scale the image decode target */
 		bmOptions.inJustDecodeBounds = false;
@@ -130,10 +130,10 @@ public class Activity_Main extends Activity {
 		Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
 		
 		/* Associate the Bitmap to the ImageView */
-		mImageView.setImageBitmap(bitmap);
-		mVideoUri = null;
-		mImageView.setVisibility(View.VISIBLE);
-		mVideoView.setVisibility(View.INVISIBLE);
+//		mImageView.setImageBitmap(bitmap);
+//		mVideoUri = null;
+//		mImageView.setVisibility(View.VISIBLE);
+//		mVideoView.setVisibility(View.INVISIBLE);
 	}
 
 	private void galleryAddPic() {
@@ -176,6 +176,7 @@ public class Activity_Main extends Activity {
 			setPic();
 			galleryAddPic();
 			mCurrentPhotoPath = null;
+
 		}
 
 	}
@@ -194,7 +195,7 @@ public class Activity_Main extends Activity {
         setContentView(R.layout.activity_main);
         
 //        mImageView = (ImageView) findViewById(R.id.imageView1);
-        mImageBitmap = null;
+//        mImageBitmap = null;
         
         
         ImageButton nextupload = (ImageButton) findViewById(R.id.upload_btn);
@@ -257,6 +258,21 @@ public class Activity_Main extends Activity {
 		switch (requestCode) {
 		case ACTION_TAKE_PHOTO_B: {
 			if (resultCode == RESULT_OK) {
+				File f = null;
+				try {
+					f = setUpPhotoFile();
+					mCurrentPhotoPath = f.getAbsolutePath();
+				} catch (IOException e) {
+					e.printStackTrace();
+					f = null;
+					mCurrentPhotoPath = null;
+				}
+				BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+				Intent uploadIntent = new Intent(Activity_Main.this, Activity_UploadNew.class);
+				bmOptions.inSampleSize = 1; //does not change image size if it is set to 1
+				Bitmap receipt = BitmapFactory.decodeFile(f.toString(), bmOptions);
+				uploadIntent.putExtra("uploadintent",  receipt);
+				startActivity(uploadIntent);
 				handleBigCameraPhoto();
 			}
 			break;
@@ -287,11 +303,11 @@ public class Activity_Main extends Activity {
 		super.onRestoreInstanceState(savedInstanceState);
 		mImageBitmap = savedInstanceState.getParcelable(BITMAP_STORAGE_KEY);
 		//mVideoUri = savedInstanceState.getParcelable(VIDEO_STORAGE_KEY);
-		mImageView.setImageBitmap(mImageBitmap);
-		mImageView.setVisibility(
-				savedInstanceState.getBoolean(IMAGEVIEW_VISIBILITY_STORAGE_KEY) ? 
-						ImageView.VISIBLE : ImageView.INVISIBLE
-		);
+//		mImageView.setImageBitmap(mImageBitmap);
+//		mImageView.setVisibility(
+//				savedInstanceState.getBoolean(IMAGEVIEW_VISIBILITY_STORAGE_KEY) ? 
+//						ImageView.VISIBLE : ImageView.INVISIBLE
+//		);
 		//mVideoView.setVideoURI(mVideoUri);
 		/*mVideoView.setVisibility(
 				savedInstanceState.getBoolean(VIDEOVIEW_VISIBILITY_STORAGE_KEY) ? 
