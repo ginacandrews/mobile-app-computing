@@ -20,8 +20,8 @@ public class Activity_Welcome extends Activity {
 			
 			public void onClick(View view) {
 				// TODO Auto-generated method stub
-				Intent uploadIntent = new Intent(view.getContext(), Activity_Signup.class);
-				startActivityForResult(uploadIntent,0);
+				Intent signupIntent = new Intent(view.getContext(), Activity_Signup.class);
+				startActivityForResult(signupIntent,0);
 			}
 		});
     }
