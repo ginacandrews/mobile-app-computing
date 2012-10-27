@@ -1,6 +1,8 @@
 package edu.nd.mobicom.codemonkey.mobilenewscoverage;
 
 
+import com.parse.ParseObject;
+
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.app.Activity;

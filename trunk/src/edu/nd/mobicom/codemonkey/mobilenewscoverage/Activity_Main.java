@@ -7,9 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import edu.nd.mobicom.codemonkey.mobilenewscoverage.AlbumStorageDirFactory;
-import edu.nd.mobicom.codemonkey.mobilenewscoverage.BaseAlbumDirFactory;
-import edu.nd.mobicom.codemonkey.mobilenewscoverage.FroyoAlbumDirFactory;
+import com.parse.ParseObject;
 
 import android.net.Uri;
 import android.os.Build;
@@ -29,325 +27,163 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.VideoView;
 
 
 
 
 public class Activity_Main extends Activity {
+	protected ImageButton _button;
+	protected ImageView _image;
+	protected TextView _field;
+	protected String _path;
+	protected boolean _taken;
+		
+	protected static final String PHOTO_TAKEN = "photo_taken";
 
-	private static final int ACTION_TAKE_PHOTO_B = 1;
-	private static final String BITMAP_STORAGE_KEY = "viewbitmap";
-	private static final String IMAGEVIEW_VISIBILITY_STORAGE_KEY = "imageviewvisibility";
-//	private ImageView mImageView;
-	private Bitmap mImageBitmap;
-
-	private static final String VIDEO_STORAGE_KEY = "viewvideo";
-	private static final String VIDEOVIEW_VISIBILITY_STORAGE_KEY = "videoviewvisibility";
-//	private VideoView mVideoView;
-	private Uri mVideoUri;
-
-	private String mCurrentPhotoPath;
-
-	private static final String JPEG_FILE_PREFIX = "IMG_";
-	private static final String JPEG_FILE_SUFFIX = ".jpg";
-
-	private AlbumStorageDirFactory mAlbumStorageDirFactory = null;
-	/* Photo album for this application */
-	private String getAlbumName() {
-		return getString(R.string.app_name);
-	}
-
-	
-	private File getAlbumDir() {
-		File storageDir = null;
-
-		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-			
-			storageDir = mAlbumStorageDirFactory.getAlbumStorageDir(getAlbumName());
-
-			if (storageDir != null) {
-				if (! storageDir.mkdirs()) {
-					if (! storageDir.exists()){
-						Log.d("CameraSample", "failed to create directory");
-						return null;
-					}
+	   @Override
+	    public void onCreate(Bundle savedInstanceState) {
+	        super.onCreate(savedInstanceState);
+	        setContentView(R.layout.activity_main);
+	        
+	        _button = ( ImageButton ) findViewById( R.id.photo_btn );
+	        _button.setOnClickListener( new ButtonClickHandler() );
+	        File file = null;
+	        //***CREATE DIR IF DOES NOT EXIST****//
+/*	        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+		        String albumName = "/Pictures/MobileNewsCoverage2/";
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+					file = new File (
+							  Environment.getExternalStoragePublicDirectory(
+							    Environment.DIRECTORY_PICTURES
+							  ), 
+							  albumName);
+				} else {
+					file = new File (
+							Environment.getExternalStorageDirectory()
+							+ "/dcim/"
+							+ albumName);
 				}
-			}
 			
-		} else {
-			Log.v(getString(R.string.app_name), "External storage is not mounted READ/WRITE.");
-		}
-		
-		return storageDir;
-	}
-	
-	private File createImageFile() throws IOException {
-		// Create an image file name
-		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-		String imageFileName = JPEG_FILE_PREFIX + timeStamp + "_";
-		File albumF = getAlbumDir();
-		File imageF = File.createTempFile(imageFileName, JPEG_FILE_SUFFIX, albumF);
-		return imageF;
-	}
-
-	private File setUpPhotoFile() throws IOException {
-		
-		File f = createImageFile();
-		mCurrentPhotoPath = f.getAbsolutePath();
-		
-		return f;
-	}
-	
-	private void setPic() {
-
-		/* There isn't enough memory to open up more than a couple camera photos */
-		/* So pre-scale the target bitmap into which the file is decoded */
-
-		/* Get the size of the ImageView */
-//		int targetW = mImageView.getWidth();
-//		int targetH = mImageView.getHeight();
-
-		/* Get the size of the image */
-		BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-		bmOptions.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-		int photoW = bmOptions.outWidth;
-		int photoH = bmOptions.outHeight;
-		
-		/* Figure out which way needs to be reduced less */
-		int scaleFactor = 1;
-//		if ((targetW > 0) || (targetH > 0)) {
-//			scaleFactor = Math.min(photoW/targetW, photoH/targetH);	
-//		}
-
-		/* Set bitmap options to scale the image decode target */
-		bmOptions.inJustDecodeBounds = false;
-		bmOptions.inSampleSize = scaleFactor;
-		bmOptions.inPurgeable = true;
-
-		/* Decode the JPEG file into a Bitmap */
-		Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-		
-		/* Associate the Bitmap to the ImageView */
-//		mImageView.setImageBitmap(bitmap);
-//		mVideoUri = null;
-//		mImageView.setVisibility(View.VISIBLE);
-//		mVideoView.setVisibility(View.INVISIBLE);
-	}
-
-	private void galleryAddPic() {
-		    Intent mediaScanIntent = new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE");
-			File f = new File(mCurrentPhotoPath);
-		    Uri contentUri = Uri.fromFile(f);
-		    mediaScanIntent.setData(contentUri);
-		    this.sendBroadcast(mediaScanIntent);
-	}
-	
-	private void dispatchTakePictureIntent(int actionCode) {
-
-		Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-		switch(actionCode) {
-		case ACTION_TAKE_PHOTO_B:
-			File f = null;
+	        }
 			
-			try {
-				f = setUpPhotoFile();
-				mCurrentPhotoPath = f.getAbsolutePath();
-				takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
-			} catch (IOException e) {
-				e.printStackTrace();
-				f = null;
-				mCurrentPhotoPath = null;
-			}
-			break;
+    		if (! file.mkdirs()) {
+    			if (! file.exists()){
+    				Log.d("CameraSample", "failed to create directory");
+    			}
+    		}
+*/
 
-		default:
-			break;			
-		} // switch
-
-		startActivityForResult(takePictureIntent, actionCode);
-	}
-	
-	private void handleBigCameraPhoto() {
-
-		if (mCurrentPhotoPath != null) {
-			setPic();
-			galleryAddPic();
-			mCurrentPhotoPath = null;
-
-		}
-
-	}
-	
-	Button.OnClickListener mTakePicOnClickListener = 
-			new Button.OnClickListener() {
-			public void onClick(View v) {
-				dispatchTakePictureIntent(ACTION_TAKE_PHOTO_B);
-			}
-		};
-		
-		
-	@Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        
-//        mImageView = (ImageView) findViewById(R.id.imageView1);
-//        mImageBitmap = null;
-        
-        
-        ImageButton nextupload = (ImageButton) findViewById(R.id.upload_btn);
-        nextupload.setOnClickListener(new Button.OnClickListener() {
-			
-			public void onClick(View view) {
-				// TODO Auto-generated method stub
-				Intent uploadIntent = new Intent(view.getContext(), Activity_UploadNew.class);
-				startActivityForResult(uploadIntent,0);
-			}
-		});
-        
-        
-        //take photo buttons
-        ImageButton nextphoto = (ImageButton) findViewById(R.id.photo_btn);
-        setBtnListenerOrDisable( 
-				nextphoto, 
-				mTakePicOnClickListener,
-				MediaStore.ACTION_IMAGE_CAPTURE
-		);
-        
-        //check if photo dir exists
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-			mAlbumStorageDirFactory = new FroyoAlbumDirFactory();
-		} else {
-			mAlbumStorageDirFactory = new BaseAlbumDirFactory();
-		}
-        
-        
-        ImageButton nextmymessages = (ImageButton) findViewById(R.id.mymessages_btn);
-        nextmymessages.setOnClickListener(new Button.OnClickListener() {
-			
-			public void onClick(View view) {
-				// TODO Auto-generated method stub
-				Intent uploadIntent = new Intent(view.getContext(), Activity_MyMessages.class);
-				startActivityForResult(uploadIntent,0);
-			}
-        }); 
-        
-        
-        ImageButton nextmyuploads = (ImageButton) findViewById(R.id.myuploads_btn);
-        nextmyuploads.setOnClickListener(new Button.OnClickListener() {
-			
-			public void onClick(View view) {
-				// TODO Auto-generated method stub
-				Intent uploadIntent = new Intent(view.getContext(), Activity_MyUploads.class);
-				startActivityForResult(uploadIntent,0);
-			}
-        }); 
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_main, menu);
-        return true;
-    }
-
-    @Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch (requestCode) {
-		case ACTION_TAKE_PHOTO_B: {
-			if (resultCode == RESULT_OK) {
-				File f = null;
-				try {
-					f = setUpPhotoFile();
-					mCurrentPhotoPath = f.getAbsolutePath();
-				} catch (IOException e) {
-					e.printStackTrace();
-					f = null;
-					mCurrentPhotoPath = null;
+			// Create an image file name
+			String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+	        
+	         _path = Environment.getExternalStorageDirectory() + "/Pictures/MobileNewsCoverage2/"+timeStamp+".jpg";
+	         
+	         File dir = new File(Environment.getExternalStorageDirectory() , "/Pictures/MobileNewsCoverage2/");
+	         if (!dir.exists()) {
+	        	 if (!file.mkdirs()) {
+	                 Log.e("TravellerLog :: ", "Problem creating Image folder");
+	             }
+	         }
+	         
+	        ImageButton nextupload = (ImageButton) findViewById(R.id.upload_btn);
+	        nextupload.setOnClickListener(new Button.OnClickListener() {
+				
+				public void onClick(View view) {
+					// TODO Auto-generated method stub
+					Intent uploadIntent = new Intent(view.getContext(), Activity_UploadNew.class);
+					startActivityForResult(uploadIntent,0);
 				}
-				BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-				Intent uploadIntent = new Intent(Activity_Main.this, Activity_UploadNew.class);
-				bmOptions.inSampleSize = 1; //does not change image size if it is set to 1
-				Bitmap receipt = BitmapFactory.decodeFile(f.toString(), bmOptions);
-				uploadIntent.putExtra("uploadintent",  receipt);
-				startActivity(uploadIntent);
-				handleBigCameraPhoto();
-			}
-			break;
-		} // ACTION_TAKE_PHOTO_B
-		/*
-		case ACTION_TAKE_VIDEO: {
-			if (resultCode == RESULT_OK) {
-				handleCameraVideo(data);
-			}
-			break;
-		} // ACTION_TAKE_VIDEO */
-		} // switch
-	}
-    
- // Some lifecycle callbacks so that the image can survive orientation change
- 	@Override
- 	protected void onSaveInstanceState(Bundle outState) {
- 		outState.putParcelable(BITMAP_STORAGE_KEY, mImageBitmap);
- 		//outState.putParcelable(VIDEO_STORAGE_KEY, mVideoUri);
- 		outState.putBoolean(IMAGEVIEW_VISIBILITY_STORAGE_KEY, (mImageBitmap != null) );
- 		//outState.putBoolean(VIDEOVIEW_VISIBILITY_STORAGE_KEY, (mVideoUri != null) );
- 		super.onSaveInstanceState(outState);
- 	}
- 	
+			});
+	        
+	        
+	        ImageButton nextmessages = (ImageButton) findViewById(R.id.mymessages_btn);
+	        nextmessages.setOnClickListener(new Button.OnClickListener() {
+				
+				public void onClick(View view) {
+					// TODO Auto-generated method stub
+					Intent uploadIntent = new Intent(view.getContext(), Activity_MyMessages.class);
+					startActivityForResult(uploadIntent,0);
+				}
+			});
+	        
+	        ImageButton nextmyuploads = (ImageButton) findViewById(R.id.myuploads_btn);
+	        nextmyuploads.setOnClickListener(new Button.OnClickListener() {
+				
+				public void onClick(View view) {
+					// TODO Auto-generated method stub
+					Intent uploadIntent = new Intent(view.getContext(), Activity_MyUploads.class);
+					startActivityForResult(uploadIntent,0);
+				}
+			});
+	        
 
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-		mImageBitmap = savedInstanceState.getParcelable(BITMAP_STORAGE_KEY);
-		//mVideoUri = savedInstanceState.getParcelable(VIDEO_STORAGE_KEY);
-//		mImageView.setImageBitmap(mImageBitmap);
-//		mImageView.setVisibility(
-//				savedInstanceState.getBoolean(IMAGEVIEW_VISIBILITY_STORAGE_KEY) ? 
-//						ImageView.VISIBLE : ImageView.INVISIBLE
-//		);
-		//mVideoView.setVideoURI(mVideoUri);
-		/*mVideoView.setVisibility(
-				savedInstanceState.getBoolean(VIDEOVIEW_VISIBILITY_STORAGE_KEY) ? 
-						ImageView.VISIBLE : ImageView.INVISIBLE
-		);*/
-	}
-	
-	/**
-	 * Indicates whether the specified action can be used as an intent. This
-	 * method queries the package manager for installed packages that can
-	 * respond to an intent with the specified action. If no suitable package is
-	 * found, this method returns false.
-	 * http://android-developers.blogspot.com/2009/01/can-i-use-this-intent.html
-	 *
-	 * @param context The application's environment.
-	 * @param action The Intent action to check for availability.
-	 *
-	 * @return True if an Intent with the specified action can be sent and
-	 *         responded to, false otherwise.
-	 */
-	public static boolean isIntentAvailable(Context context, String action) {
-		final PackageManager packageManager = context.getPackageManager();
-		final Intent intent = new Intent(action);
-		List<ResolveInfo> list =
-			packageManager.queryIntentActivities(intent,
-					PackageManager.MATCH_DEFAULT_ONLY);
-		return list.size() > 0;
-	}
-
-	private void setBtnListenerOrDisable( 
-			ImageButton nextphoto, 
-			Button.OnClickListener onClickListener,
-			String intentName
-	) {
-		if (isIntentAvailable(this, intentName)) {
-			nextphoto.setOnClickListener(onClickListener);        	
-		} else {
-			nextphoto.setTag( 
-				getText(R.string.cannot).toString() + " " + nextphoto.getTag());
-			nextphoto.setClickable(false);
-		}
-	}
+/*	        ImageButton nextphoto = (ImageButton) findViewById(R.id.photo_btn);
+	        nextphoto.setOnClickListener(new Button.OnClickListener() {
+				
+				public void onClick(View view) {
+					// TODO Auto-generated method stub
+					Intent uploadIntent = new Intent(view.getContext(), Activity_Main.class);
+					startActivityForResult(uploadIntent,0);
+				}
+			});*/
+	    }
+	   
+	   public class ButtonClickHandler implements View.OnClickListener 
+	   {
+	       public void onClick( View view ){
+	       	startCameraActivity();
+	       }
+	   }	
+	   
+	   protected void startCameraActivity()
+	   {
+	       File file = new File( _path );
+	       Uri outputFileUri = Uri.fromFile( file );
+	       	
+	       Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE );
+	       intent.putExtra( MediaStore.EXTRA_OUTPUT, outputFileUri );
+	       	
+	       startActivityForResult( intent, 0 );
+	   }
+	   
+	   @Override
+	   protected void onActivityResult(int requestCode, int resultCode, Intent data) 
+	   {	
+	       Log.i( "MakeMachine", "resultCode: " + resultCode );
+	       switch( resultCode )
+	       {
+	       	case 0:
+	       		Log.i( "MakeMachine", "User cancelled" );
+	       		break;
+	       			
+	       	case -1:
+	       		onPhotoTaken();
+	       		break;
+	       }
+	   }
+	   
+	   protected void onPhotoTaken()
+	   {
+	       _taken = true;
+	       	
+	       BitmapFactory.Options options = new BitmapFactory.Options();
+	       options.inSampleSize = 4;
+	       	
+	       Bitmap bitmap = BitmapFactory.decodeFile( _path, options );
+	   }
+	   
+	   @Override
+	   protected void onSaveInstanceState( Bundle outState ) {
+	       outState.putBoolean( Activity_Main.PHOTO_TAKEN, _taken );
+	   }
+	   @Override 
+	   protected void onRestoreInstanceState( Bundle savedInstanceState)
+	   {
+	       Log.i( "MakeMachine", "onRestoreInstanceState()");
+	       if( savedInstanceState.getBoolean( Activity_Main.PHOTO_TAKEN ) ) {
+	       	onPhotoTaken();
+	       }
+	   }
 }
