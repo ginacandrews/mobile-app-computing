@@ -38,6 +38,7 @@ public class Activity_Main extends Activity {
 	protected ImageView _image;
 	protected TextView _field;
 	protected String _path;
+	protected String _dirpath;
 	protected boolean _taken;
 		
 	protected static final String PHOTO_TAKEN = "photo_taken";
@@ -49,41 +50,24 @@ public class Activity_Main extends Activity {
 	        
 	        _button = ( ImageButton ) findViewById( R.id.photo_btn );
 	        _button.setOnClickListener( new ButtonClickHandler() );
-	        File file = null;
-	        //***CREATE DIR IF DOES NOT EXIST****//
-/*	        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-		        String albumName = "/Pictures/MobileNewsCoverage2/";
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-					file = new File (
-							  Environment.getExternalStoragePublicDirectory(
-							    Environment.DIRECTORY_PICTURES
-							  ), 
-							  albumName);
-				} else {
-					file = new File (
-							Environment.getExternalStorageDirectory()
-							+ "/dcim/"
-							+ albumName);
-				}
-			
-	        }
-			
-    		if (! file.mkdirs()) {
-    			if (! file.exists()){
-    				Log.d("CameraSample", "failed to create directory");
-    			}
-    		}
-*/
 
 			// Create an image file name
 			String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 	        
-	         _path = Environment.getExternalStorageDirectory() + "/Pictures/MobileNewsCoverage2/"+timeStamp+".jpg";
+	         _dirpath = Environment.getExternalStorageDirectory() +"/MobileNewsCoverage/";
+	         Log.wtf("help", _dirpath);
 	         
-	         File dir = new File(Environment.getExternalStorageDirectory() , "/Pictures/MobileNewsCoverage2/");
-	         if (!dir.exists()) {
-	        	 if (!file.mkdirs()) {
+	         File picdir = new File(_dirpath+ "/Pictures/");
+	         if (!picdir.exists()) {
+	        	 if (!picdir.mkdirs()) {
 	                 Log.e("TravellerLog :: ", "Problem creating Image folder");
+	             }
+	         }
+	         
+	         File viddir = new File(_dirpath+  "/Videos/");
+	         if (!viddir.exists()) {
+	        	 if (!viddir.mkdirs()) {
+	                 Log.e("TravellerLog :: ", "Problem creating Video folder");
 	             }
 	         }
 	         
@@ -139,6 +123,9 @@ public class Activity_Main extends Activity {
 	   
 	   protected void startCameraActivity()
 	   {
+		   String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+		   _path=_dirpath+"Pictures/"+timeStamp+".jpg";
+		   Log.wtf("the path is", _path);
 	       File file = new File( _path );
 	       Uri outputFileUri = Uri.fromFile( file );
 	       	
