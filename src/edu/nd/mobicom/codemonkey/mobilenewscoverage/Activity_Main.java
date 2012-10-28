@@ -34,7 +34,8 @@ import android.widget.VideoView;
 
 
 public class Activity_Main extends Activity {
-	protected ImageButton _button;
+	protected ImageButton _picbutton;
+	protected ImageButton _vidbutton;
 	protected ImageView _image;
 	protected TextView _field;
 	protected String _path;
@@ -48,8 +49,11 @@ public class Activity_Main extends Activity {
 	        super.onCreate(savedInstanceState);
 	        setContentView(R.layout.activity_main);
 	        
-	        _button = ( ImageButton ) findViewById( R.id.photo_btn );
-	        _button.setOnClickListener( new ButtonClickHandler() );
+	        _picbutton = ( ImageButton ) findViewById( R.id.photo_btn );
+	        _picbutton.setOnClickListener( new PicButtonClickHandler() );
+	        
+	        _vidbutton = (ImageButton) findViewById(R.id.video_btn);
+	        _vidbutton.setOnClickListener(new VidButtonClickHandler() );
 
 			// Create an image file name
 			String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -102,34 +106,45 @@ public class Activity_Main extends Activity {
 				}
 			});
 	        
-
-/*	        ImageButton nextphoto = (ImageButton) findViewById(R.id.photo_btn);
-	        nextphoto.setOnClickListener(new Button.OnClickListener() {
-				
-				public void onClick(View view) {
-					// TODO Auto-generated method stub
-					Intent uploadIntent = new Intent(view.getContext(), Activity_Main.class);
-					startActivityForResult(uploadIntent,0);
-				}
-			});*/
 	    }
 	   
-	   public class ButtonClickHandler implements View.OnClickListener 
+	   public class PicButtonClickHandler implements View.OnClickListener 
 	   {
 	       public void onClick( View view ){
 	       	startCameraActivity();
 	       }
-	   }	
+	   }
+	   
+	   public class VidButtonClickHandler implements View.OnClickListener 
+	   {
+	       public void onClick( View view ){
+	       	startVideoActivity();
+	       }
+	   }
 	   
 	   protected void startCameraActivity()
 	   {
 		   String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 		   _path=_dirpath+"Pictures/"+timeStamp+".jpg";
-		   Log.wtf("the path is", _path);
+		   Log.wtf("the pic path is", _path);
 	       File file = new File( _path );
 	       Uri outputFileUri = Uri.fromFile( file );
 	       	
 	       Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE );
+	       intent.putExtra( MediaStore.EXTRA_OUTPUT, outputFileUri );
+	       	
+	       startActivityForResult( intent, 0 );
+	   }
+	   
+	   protected void startVideoActivity()
+	   {
+		   String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+		   _path=_dirpath+"Videos/"+timeStamp+".mp4";
+		   Log.wtf("the vid path is", _path);
+	       File file = new File( _path );
+	       Uri outputFileUri = Uri.fromFile( file );  
+		   
+	       Intent intent = new Intent(android.provider.MediaStore.ACTION_VIDEO_CAPTURE );
 	       intent.putExtra( MediaStore.EXTRA_OUTPUT, outputFileUri );
 	       	
 	       startActivityForResult( intent, 0 );
