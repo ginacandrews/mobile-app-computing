@@ -1,0 +1,56 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="edu.nd.mobicom.codemonkey.mobilenewscoverage"
+    android:versionCode="1"
+    android:versionName="1.0" >
+	
+    <uses-sdk
+        android:minSdkVersion="10"
+        android:targetSdkVersion="15" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> 
+	
+    <application
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        
+       <activity
+            android:name=".Activity_Welcome"
+            android:label="@string/title_activity_activity__welcome" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity> 
+       
+        <activity
+            android:name=".Activity_Main"
+            android:label="@string/title_activity_activity__main" >
+        </activity>
+    
+        <activity
+            android:name=".Activity_UploadNew"
+            android:label="@string/title_activity_activity__uploadnew" >
+        </activity>
+
+        <activity
+            android:name=".Activity_MyMessages"
+            android:label="@string/title_activity_activity__mymessages" >
+        </activity>
+ 
+       <activity
+            android:name=".Activity_MyUploads"
+            android:label="@string/title_activity_activity__myuploads" >
+        </activity>
+    
+       <activity
+            android:name=".Activity_Signup"
+            android:label="@string/title_activity_activity__signup" >
+        </activity>         
+    </application>
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+</manifest>
