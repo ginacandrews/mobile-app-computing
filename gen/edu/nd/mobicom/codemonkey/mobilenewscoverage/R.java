@@ -28,13 +28,14 @@ public final class R {
         public static final int compsignup_btn=0x7f07001c;
         public static final int email=0x7f070012;
         public static final int imageView1=0x7f07001d;
+        public static final int login_btn=0x7f07001e;
         public static final int main_btn=0x7f07000e;
-        public static final int menu_settings=0x7f07001f;
+        public static final int menu_settings=0x7f070020;
         public static final int mymessages_btn=0x7f07000d;
         public static final int myuploads_btn=0x7f07000c;
         public static final int password=0x7f070010;
         public static final int photo_btn=0x7f070006;
-        public static final int signup_btn=0x7f07001e;
+        public static final int signup_btn=0x7f07001f;
         public static final int tableRow1=0x7f070000;
         public static final int tableRow2=0x7f070002;
         public static final int tableRow3=0x7f070005;

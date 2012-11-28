@@ -1,0 +1,4 @@
+INDEX VERSION 1.126+C:\Users\user\Desktop\Dropbox\mobile apps\App\MobileNewsCoverage\.metadata\.plugins\org.eclipse.jdt.core
+3707214822.index
+1778205880.index
+723825981.index

@@ -1,0 +1,364 @@
+package edu.nd.mobicom.codemonkey.mobilenewscoverage;
+
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.io.InputStream;
+import java.io.FileInputStream;
+
+import com.parse.ParseFile;
+import com.parse.ParseObject;
+
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.Menu;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.VideoView;
+
+
+
+
+public class Activity_Main extends Activity {
+	protected ImageButton _picbutton;
+	protected ImageButton _vidbutton;
+	protected ImageView _image;
+	protected TextView _field;
+	protected String _path;
+	protected String _dirpath;
+	protected boolean _taken;
+	public Location test;
+	public String timeStamp;
+	
+	protected static final String PHOTO_TAKEN = "photo_taken";
+
+	   @Override
+	    public void onCreate(Bundle savedInstanceState) {
+	        super.onCreate(savedInstanceState);
+	        setContentView(R.layout.activity_main);
+	        
+	        // Location
+	        LocationManager mlocManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+	        LocationListener mlocListener = new MyLocationListener();
+	        mlocManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, 0, 0, mlocListener);
+	        
+	        _picbutton = ( ImageButton ) findViewById( R.id.photo_btn );
+	        _picbutton.setOnClickListener( new PicButtonClickHandler() );
+	        
+	        _vidbutton = (ImageButton) findViewById(R.id.video_btn);
+	        _vidbutton.setOnClickListener(new VidButtonClickHandler() );
+
+			// Create an image file name
+			String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+	        
+	         _dirpath = Environment.getExternalStorageDirectory() +"/MobileNewsCoverage/";
+	         Log.wtf("help", _dirpath);
+	         
+	         File picdir = new File(_dirpath+ "/Pictures/");
+	         if (!picdir.exists()) {
+	        	 if (!picdir.mkdirs()) {
+	                 Log.e("TravellerLog :: ", "Problem creating Image folder");
+	             }
+	         }
+	         
+	         File viddir = new File(_dirpath+  "/Videos/");
+	         if (!viddir.exists()) {
+	        	 if (!viddir.mkdirs()) {
+	                 Log.e("TravellerLog :: ", "Problem creating Video folder");
+	             }
+	         }
+	         
+	        ImageButton nextupload = (ImageButton) findViewById(R.id.upload_btn);
+	        nextupload.setOnClickListener(new Button.OnClickListener() {
+				
+				public void onClick(View view) {
+					// TODO Auto-generated method stub
+					Intent uploadIntent = new Intent(view.getContext(), Activity_UploadNew.class);
+					startActivityForResult(uploadIntent,0);
+				}
+			});
+	        
+	        
+	        ImageButton nextmessages = (ImageButton) findViewById(R.id.mymessages_btn);
+	        nextmessages.setOnClickListener(new Button.OnClickListener() {
+				
+				public void onClick(View view) {
+					// TODO Auto-generated method stub
+					Intent uploadIntent = new Intent(view.getContext(), Activity_MyMessages.class);
+					startActivityForResult(uploadIntent,0);
+				}
+			});
+	        
+	        ImageButton nextmyuploads = (ImageButton) findViewById(R.id.myuploads_btn);
+	        nextmyuploads.setOnClickListener(new Button.OnClickListener() {
+				
+				public void onClick(View view) {
+					// TODO Auto-generated method stub
+					Intent uploadIntent = new Intent(view.getContext(), Activity_MyUploads.class);
+					startActivityForResult(uploadIntent,0);
+				}
+			});
+	        
+	    }
+	   // Location Listener
+	   public class MyLocationListener implements LocationListener{
+
+	        //@Override
+
+	        public void onLocationChanged(Location loc){
+	            loc.getLatitude();
+	            loc.getLongitude();
+	            String Text = "Lat = " + loc.getLatitude() + "|Long = " + loc.getLongitude();
+	            Toast.makeText( getApplicationContext(), Text, Toast.LENGTH_SHORT).show();
+	          //  final TextView tv = (TextView) findViewById(R.id.text);
+	          //  tv.setText(tv.getText()+ "||" + Text);
+	            test = loc;
+	        }
+
+	        //@Override
+
+	        public void onProviderDisabled(String provider){
+	            Toast.makeText( getApplicationContext(),"Gps Disabled", Toast.LENGTH_SHORT ).show();
+	        }
+
+	        //@Override
+
+	        public void onProviderEnabled(String provider){
+	            Toast.makeText( getApplicationContext(),"Gps Enabled",Toast.LENGTH_SHORT).show();
+	        }
+
+	        //@Override
+
+	        public void onStatusChanged(String provider, int status, Bundle extras){
+	        }
+
+	    }
+	   
+	   public class PicButtonClickHandler implements View.OnClickListener 
+	   {
+	       public void onClick( View view ){
+	       	startCameraActivity();
+	       }
+	   }
+	   
+	   public class VidButtonClickHandler implements View.OnClickListener 
+	   {
+	       public void onClick( View view ){
+	       	startVideoActivity();
+	       }
+	   }
+	   
+	   protected void startCameraActivity()
+	   {
+		   timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+		   _path=_dirpath+"Pictures/"+timeStamp+".png";
+		   Log.wtf("the pic path is", _path);
+	       File file = new File( _path );
+	       Uri outputFileUri = Uri.fromFile( file );
+	       	
+	       Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE );
+	       intent.putExtra( MediaStore.EXTRA_OUTPUT, outputFileUri );
+	       
+	    //   byte[] data = new byte[(int)file.length()];
+/*	       
+	       byte[] data = null;
+	       try {
+			data = getBytesFromFile(file);
+			Toast.makeText( getApplicationContext(),"getbytes successful",Toast.LENGTH_SHORT).show();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Toast.makeText( getApplicationContext(),"getbytes failed: "+e,Toast.LENGTH_LONG).show();
+		}
+	       
+	    */   
+	       
+/*	       
+	  //     file.read(data);
+	       ParseFile testupload = new ParseFile(timeStamp+".png", data);
+	       testupload.saveInBackground();
+	       
+	       ParseObject uploadmedia = new ParseObject("Media");
+	       uploadmedia.put("filename", timeStamp+".png");
+	       uploadmedia.put("file", testupload);
+	       uploadmedia.saveInBackground();
+*/
+	       
+	       
+	       if (test==null){
+	    	   Context context = getApplicationContext();
+		    	CharSequence text = "null: no gps information";
+		    	int duration = Toast.LENGTH_SHORT;
+
+		    	Toast toast = Toast.makeText(context, text, duration);
+		    	toast.setGravity(Gravity.CENTER|Gravity.CENTER, 0, 0);
+		    	
+		    	toast.show();
+		    	//Toast.makeText(Activity_Main.this, "null: no gps information", Toast.LENGTH_SHORT).show();
+           }
+           else{
+        	   Context context = getApplicationContext();
+		    	CharSequence text = "(long,lat): (" + String.valueOf(test.getLongitude()) + "," + String.valueOf(test.getLatitude()) + ")";
+		    	int duration = Toast.LENGTH_SHORT;
+
+		    	Toast toast = Toast.makeText(context, text, duration);
+		    	toast.setGravity(Gravity.CENTER|Gravity.CENTER, 0, 0);
+		    	
+		    	toast.show();
+        	   /*
+        	   test.getLatitude();
+               String ausgabe = String.valueOf(test.getLatitude());
+               Toast.makeText(AndroidCamera.this, ausgabe, Toast.LENGTH_SHORT).show();
+               */
+           }
+	
+	       startActivityForResult( intent, 0 );
+	   }
+	   
+	   protected void startVideoActivity()
+	   {
+		   String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+		   _path=_dirpath+"Videos/"+timeStamp+".mp4";
+		   Log.wtf("the vid path is", _path);
+	       File file = new File( _path );
+	       Uri outputFileUri = Uri.fromFile( file );  
+		   
+	       Intent intent = new Intent(android.provider.MediaStore.ACTION_VIDEO_CAPTURE );
+	       intent.putExtra( MediaStore.EXTRA_OUTPUT, outputFileUri );
+	       	
+	       startActivityForResult( intent, 0 );
+	   }
+	   
+	   @Override
+	   protected void onActivityResult(int requestCode, int resultCode, Intent data) 
+	   {	
+	       Log.i( "MakeMachine", "resultCode: " + resultCode );
+	       switch( resultCode )
+	       {
+	       	case 0:
+	       		Log.i( "MakeMachine", "User cancelled" );
+	       		break;
+	       			
+	       	case -1:
+	       		onPhotoTaken();
+	       		break;
+	       }
+	   }
+	   
+	   protected void onPhotoTaken()
+	   {
+	       _taken = true;
+	       	
+	       BitmapFactory.Options options = new BitmapFactory.Options();
+	       options.inSampleSize = 4;
+	       	
+	       Bitmap bitmap = BitmapFactory.decodeFile( _path, options );
+	       
+	       ByteArrayOutputStream stream = new ByteArrayOutputStream();
+	       bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+	       byte[] data = stream.toByteArray();
+	       
+	       
+	       ParseFile testupload = new ParseFile(timeStamp+".png", data);
+	       testupload.saveInBackground();
+	       
+	       ParseObject uploadmedia = new ParseObject("Media");
+	       uploadmedia.put("filename", timeStamp+".png");
+	       uploadmedia.put("file", testupload);
+	       uploadmedia.saveInBackground();
+	       
+	       
+	   }
+	   
+	   @Override
+	   protected void onSaveInstanceState( Bundle outState ) {
+	       outState.putBoolean( Activity_Main.PHOTO_TAKEN, _taken );
+	   }
+	   @Override 
+	   protected void onRestoreInstanceState( Bundle savedInstanceState)
+	   {
+	       Log.i( "MakeMachine", "onRestoreInstanceState()");
+	       if( savedInstanceState.getBoolean( Activity_Main.PHOTO_TAKEN ) ) {
+	       	onPhotoTaken();
+	       }
+	   }
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   public static byte[] getBytesFromFile(File file) throws IOException {
+		   
+		    InputStream is = new FileInputStream(file);
+		    System.out.println("\nDEBUG: FileInputStream is " + file);
+		 
+		    // Get the size of the file
+		    long length = file.length();
+		    System.out.println("DEBUG: Length of " + file + " is " + length + "\n");
+		 
+		    /*
+		     * You cannot create an array using a long type. It needs to be an int
+		     * type. Before converting to an int type, check to ensure that file is
+		     * not larger than Integer.MAX_VALUE;
+		     */
+		    if (length > Integer.MAX_VALUE) {
+		        System.out.println("File is too large to process");
+		        return null;
+		    }
+		 
+		    // Create the byte array to hold the data
+		    byte[] bytes = new byte[(int)length];
+		 
+		    // Read in the bytes
+		    int offset = 0;
+		    int numRead = 0;
+		    while ((offset < bytes.length) && ((numRead=is.read(bytes, offset, bytes.length-offset)) >= 0)) {
+		        offset += numRead;
+		    }
+		 
+		    // Ensure all the bytes have been read in
+		    if (offset < bytes.length) {
+		        throw new IOException("Could not completely read file " + file.getName());
+		    }
+		 
+		    is.close();
+		    return bytes;
+		}
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+}
